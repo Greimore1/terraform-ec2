@@ -1,4 +1,3 @@
-# .github/workflows/terraform.yml
 name: "Terraform"
 
 on:
@@ -14,27 +13,33 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3  # Updated to v3
 
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2  # Updated to v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-2
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2  # Updated to v2
+      with:
+        terraform_version: 1.5.7  # Specify a recent Terraform version
+        terraform_wrapper: false  # Helps with direct output capturing
 
     - name: Terraform Init
       run: terraform init
-
+      
     - name: Terraform Format
       run: terraform fmt -check
       
+    - name: Terraform Validate
+      run: terraform validate
+      
     - name: Terraform Plan
-      if: github.event_name == 'pull_request'
       run: terraform plan
+      if: github.event_name == 'pull_request'
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
